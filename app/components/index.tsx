@@ -92,6 +92,83 @@ const Main: FC<IMainProps> = () => {
     // parse variables in introduction
     setChatList(generateNewChatListWithOpenStatement('', inputs))
   }
+  
+  // 将handleStartChat方法暴露到window对象上，使其可以通过iframe被外部调用
+  useEffect(() => {
+    // 将handleStartChat方法暴露到window对象上
+    (window as any).difyChatbot = {
+      startChat: handleStartChat,
+      // 可以在这里添加更多需要暴露的方法
+    }
+    // 添加消息监听器处理跨域通信
+    const handleMessage = (event: MessageEvent) => {      
+      if (event.data.type === 'START_CHAT') {
+        console.log('START_CHAT', event.data.inputs)
+        // if (currConversationId === '-1') {
+        //   handleConversationIdChange('-1')
+        // }
+        setCurrInputs(event.data.inputs)
+
+        // setChatStarted()
+        // // parse variables in introduction
+        // setChatList(generateNewChatListWithOpenStatement('', event.data.inputs))
+        // handleStartChat(event.data.inputs);
+
+        const inputLens = Object.values(event.data.inputs).length;
+        const promptVariablesLens = promptConfig?.prompt_variables?.length || 0;
+        
+        const allInputsHaveValue = inputLens >= promptVariablesLens && 
+          Object.values(event.data.inputs).filter(v => v === '' || v === null || v === undefined).length === 0;
+          
+        if (allInputsHaveValue) {
+          // 自动发送一条消息
+          handleSend('生成函件', undefined, event.data.inputs)
+        }
+
+        // 发送响应回父页面
+        event.source?.postMessage({
+          type: 'CHAT_STARTED',
+          success: true
+        }, { targetOrigin: event.origin });
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      delete (window as any).difyChatbot;
+    };
+  }, []);
+  
+  useEffect(() => {
+    console.log('currInputs', currInputs)
+    if (!currInputs || !promptConfig?.prompt_variables || isChatStarted)
+      return;
+  
+    const inputLens = Object.values(currInputs).length;
+    const promptVariablesLens = promptConfig.prompt_variables.length;
+    
+    const allInputsHaveValue = inputLens >= promptVariablesLens && 
+      Object.values(currInputs).filter(v => v === '' || v === null || v === undefined).length === 0;
+    
+    if (allInputsHaveValue) {
+      handleStartChat(currInputs);
+    }
+  }, [currInputs, promptConfig?.prompt_variables, isChatStarted]);
+
+  // 页面加载完成后，自动调用handleStartChat方法，进入会话页面
+  useEffect(() => {
+    // handleStartChat(currInputs || {});
+    console.log('hi', currInputs, currConversationId)
+    if (currConversationId !== '-1') {
+      console.log('o')
+      handleConversationIdChange('-1')
+    } else {
+      handleStartChat({});
+    }
+  }, [inited]);
+
   const hasSetInputs = (() => {
     if (!isNewConversation)
       return true
@@ -326,13 +403,14 @@ const Main: FC<IMainProps> = () => {
     setChatList(newListWithAnswer)
   }
 
-  const handleSend = async (message: string, files?: VisionFile[]) => {
+  const handleSend = async (message: string, files?: VisionFile[], inputsCof?: object) => {
     if (isResponding) {
       notify({ type: 'info', message: t('app.errorMessage.waitForResponse') })
       return
     }
+    console.log(currInputs, isNewConversation, currConversationId)
     const data: Record<string, any> = {
-      inputs: currInputs,
+      inputs: inputsCof || currInputs,
       query: message,
       conversation_id: isNewConversation ? null : currConversationId,
     }
@@ -620,14 +698,15 @@ const Main: FC<IMainProps> = () => {
 
   return (
     <div className='bg-gray-100'>
+      {/* 上方标题区域 */}
       <Header
         title={APP_INFO.title}
         isMobile={isMobile}
         onShowSideBar={showSidebar}
         onCreateNewChat={() => handleConversationIdChange('-1')}
       />
-      <div className="flex rounded-t-2xl bg-white overflow-hidden">
-        {/* sidebar */}
+      <div className="flex bg-[#F2F3F5] overflow-hidden">
+        {/* sidebar 左侧会话列表区域 */}
         {!isMobile && renderSidebar()}
         {isMobile && isShowSidebar && (
           <div className='fixed inset-0 z-50'

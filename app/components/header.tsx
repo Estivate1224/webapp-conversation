@@ -1,5 +1,6 @@
 import type { FC } from 'react'
 import React from 'react'
+import Image from 'next/image'
 import {
   Bars3Icon,
   PencilSquareIcon,
@@ -18,7 +19,7 @@ const Header: FC<IHeaderProps> = ({
   onCreateNewChat,
 }) => {
   return (
-    <div className="shrink-0 flex items-center justify-between h-12 px-3 bg-gray-100">
+    <div className="shrink-0 flex items-center justify-between h-12 px-3 bg-white border-b border-gray-100">
       {isMobile
         ? (
           <div
@@ -28,9 +29,10 @@ const Header: FC<IHeaderProps> = ({
             <Bars3Icon className="h-4 w-4 text-gray-500" />
           </div>
         )
-        : <div></div>}
+        : <template></template>}
       <div className='flex items-center space-x-2'>
-        <AppIcon size="small" />
+        {/* <AppIcon size="small" /> */}
+        <Image src="/icons/robot.png" alt="Robot icon" width={28} height={28} />
         <div className=" text-sm text-gray-800 font-bold">{title}</div>
       </div>
       {isMobile
@@ -40,7 +42,7 @@ const Header: FC<IHeaderProps> = ({
           >
             <PencilSquareIcon className="h-4 w-4 text-gray-500" />
           </div>)
-        : <div></div>}
+        : <template></template>}
     </div>
   )
 }

@@ -99,7 +99,10 @@ const Welcome: FC<IWelcomeProps> = ({
                 <Select
                   className='w-full'
                   defaultValue={inputs?.[item.key]}
-                  onSelect={(i) => { setInputs({ ...inputs, [item.key]: i.value }) }}
+                  onSelect={(i) => { 
+                    setInputs({ ...inputs, [item.key]: i.value }) 
+                    onInputsChange({ ...inputs, [item.key]: i.value })
+                  }}
                   items={(item.options || []).map(i => ({ name: i, value: i }))}
                   allowSearch={false}
                   bgClassName='bg-gray-50'
@@ -109,7 +112,10 @@ const Welcome: FC<IWelcomeProps> = ({
               <input
                 placeholder={`${item.name}${!item.required ? `(${t('app.variableTable.optional')})` : ''}`}
                 value={inputs?.[item.key] || ''}
-                onChange={(e) => { setInputs({ ...inputs, [item.key]: e.target.value }) }}
+                onChange={(e) => { 
+                  setInputs({ ...inputs, [item.key]: e.target.value }) 
+                  onInputsChange({ ...inputs, [item.key]: e.target.value })
+                }}
                 className={'w-full flex-grow py-2 pl-3 pr-3 box-border rounded-lg bg-gray-50'}
                 maxLength={item.max_length || DEFAULT_VALUE_MAX_LEN}
               />
@@ -119,7 +125,10 @@ const Welcome: FC<IWelcomeProps> = ({
                 className="w-full h-[104px] flex-grow py-2 pl-3 pr-3 box-border rounded-lg bg-gray-50"
                 placeholder={`${item.name}${!item.required ? `(${t('app.variableTable.optional')})` : ''}`}
                 value={inputs?.[item.key] || ''}
-                onChange={(e) => { setInputs({ ...inputs, [item.key]: e.target.value }) }}
+                onChange={(e) => { 
+                  setInputs({ ...inputs, [item.key]: e.target.value });
+                  onInputsChange({ ...inputs, [item.key]: e.target.value }) 
+                }}
               />
             )}
             {item.type === 'number' && (
@@ -149,8 +158,9 @@ const Welcome: FC<IWelcomeProps> = ({
   }
 
   const handleChat = () => {
-    if (!canChat())
-      return
+    // 注释判断是否表单已全部填写的逻辑
+    // if (!canChat())
+    //   return
 
     onStartChat(inputs)
   }
@@ -190,6 +200,7 @@ const Welcome: FC<IWelcomeProps> = ({
     )
   }
 
+  // 刚进入页面的弹窗
   const renderVarPanel = () => {
     return (
       <TemplateVarPanel
@@ -207,12 +218,14 @@ const Welcome: FC<IWelcomeProps> = ({
     )
   }
 
+  // 保存按钮
   const renderVarOpBtnGroup = () => {
     return (
       <VarOpBtnGroup
         onConfirm={() => {
-          if (!canChat())
-            return
+          // 注释判断是否表单已全部填写的逻辑
+          // if (!canChat())
+          //   return
 
           onInputsChange(inputs)
           setIsFold(true)
@@ -268,6 +281,7 @@ const Welcome: FC<IWelcomeProps> = ({
     )
   }
 
+  // 进入对话页面后的可以编辑配置的弹窗
   const renderHasSetInputsPrivate = () => {
     if (!canEditInputs || !hasVar)
       return null
@@ -305,8 +319,9 @@ const Welcome: FC<IWelcomeProps> = ({
   }
 
   return (
-    <div className='relative mobile:min-h-[48px] tablet:min-h-[64px]'>
-      {hasSetInputs && renderHeader()}
+    //  mobile:min-h-[48px] tablet:min-h-[64px]
+    <div className='relative'>
+      {/* {hasSetInputs && renderHeader()} */}
       <div className='mx-auto pc:w-[794px] max-w-full mobile:w-full px-3.5'>
         {/*  Has't set inputs  */}
         {
@@ -324,7 +339,7 @@ const Welcome: FC<IWelcomeProps> = ({
         }
 
         {/* Has set inputs */}
-        {hasSetInputs && renderHasSetInputs()}
+        {/* {hasSetInputs && renderHasSetInputs()} */}
 
         {/* foot */}
         {!hasSetInputs && (

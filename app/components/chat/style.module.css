@@ -21,7 +21,7 @@
 .questionIcon {
   background: url(./icons/default-avatar.jpg);
   background-size: contain;
-  border-radius: 50%;
+  border-radius: 10px;
 }
 
 .answer::before,
@@ -46,10 +46,10 @@
   display: flex;
 }
 
-.question::before {
+/* .question::before {
   right: 0;
   background: url(./icons/question.svg) no-repeat;
-}
+} */
 
 .textArea {
   padding-top: 13px;

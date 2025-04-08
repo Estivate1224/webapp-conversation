@@ -38,6 +38,7 @@ const TemplateVarPanel: FC<ITemplateVarPanelProps> = ({
   )
 }
 
+// 编辑配置弹窗的标题
 export const PanelTitle: FC<{ title: string; className?: string }> = ({
   title,
   className,

@@ -1,6 +1,7 @@
 'use client'
 import type { FC } from 'react'
 import React from 'react'
+import Image from 'next/image'
 import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/24/outline'
 import { useTranslation } from 'react-i18next'
 import LoadingAnim from '../loading-anim'
@@ -168,16 +169,18 @@ const Answer: FC<IAnswerProps> = ({
   return (
     <div key={id}>
       <div className='flex items-start'>
-        <div className={`${s.answerIcon} w-10 h-10 shrink-0`}>
-          {isResponding
+        {/* ${s.answerIcon}  */}
+        <div className={`w-10 h-10 shrink-0`}>
+          {/* {isResponding
             && <div className={s.typeingIcon}>
               <LoadingAnim type='avatar' />
             </div>
-          }
+          } */}
+          <Image src="/icons/robot.png" alt="Robot icon" width={40} height={40} />
         </div>
         <div className={`${s.answerWrap}`}>
           <div className={`${s.answer} relative text-sm text-gray-900`}>
-            <div className={`ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl ${workflowProcess && 'min-w-[480px]'}`}>
+            <div className={`ml-2 py-3 px-4 bg-white rounded-tr-2xl rounded-b-2xl ${workflowProcess && 'min-w-[480px]'} max-w-[85%]`}>
               {workflowProcess && (
                 <WorkflowProcess data={workflowProcess} hideInfo />
               )}
