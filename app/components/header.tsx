@@ -22,12 +22,13 @@ const Header: FC<IHeaderProps> = ({
     <div className="shrink-0 flex items-center justify-between h-12 px-3 bg-white border-b border-gray-100">
       {isMobile
         ? (
-          <div
-            className='flex items-center justify-center h-8 w-8 cursor-pointer'
-            onClick={() => onShowSideBar?.()}
-          >
-            <Bars3Icon className="h-4 w-4 text-gray-500" />
-          </div>
+          <div></div>
+          // <div
+          //   className='flex items-center justify-center h-8 w-8 cursor-pointer'
+          //   onClick={() => onShowSideBar?.()}
+          // >
+          //   <Bars3Icon className="h-4 w-4 text-gray-500" />
+          // </div>
         )
         : <template></template>}
       <div className='flex items-center space-x-2'>
