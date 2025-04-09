@@ -27,6 +27,18 @@ export type IMainProps = {
   params: any
 }
 
+const defaultObj = {
+  access_org: '',
+  access_org_function: '',
+  access_reason: '',
+  office_position: '',
+  access_num: 0,
+  app_name: '',
+  terminal: '',
+  sec_software: '',
+  is_self_build: '',
+}
+
 const Main: FC<IMainProps> = () => {
   const { t } = useTranslation()
   const media = useBreakpoints()
@@ -85,6 +97,7 @@ const Main: FC<IMainProps> = () => {
   const [conversationIdChangeBecauseOfNew, setConversationIdChangeBecauseOfNew, getConversationIdChangeBecauseOfNew] = useGetState(false)
   const [isChatStarted, { setTrue: setChatStarted, setFalse: setChatNotStarted }] = useBoolean(false)
   const handleStartChat = (inputs: Record<string, any>) => {
+    // console.log('handleStartChat', inputs)
     createNewChat()
     setConversationIdChangeBecauseOfNew(true)
     setCurrInputs(inputs)
@@ -93,26 +106,16 @@ const Main: FC<IMainProps> = () => {
     setChatList(generateNewChatListWithOpenStatement('', inputs))
   }
   
-  // 将handleStartChat方法暴露到window对象上，使其可以通过iframe被外部调用
   useEffect(() => {
-    // 将handleStartChat方法暴露到window对象上
-    (window as any).difyChatbot = {
-      startChat: handleStartChat,
-      // 可以在这里添加更多需要暴露的方法
-    }
     // 添加消息监听器处理跨域通信
     const handleMessage = (event: MessageEvent) => {      
       if (event.data.type === 'START_CHAT') {
+        const conversationIdInfo = localStorage.getItem('conversationIdInfo')
+        const conversationIdInfoObj = JSON.parse(conversationIdInfo || '{}')
+        const currConversationId = conversationIdInfoObj[APP_ID] 
+        setCurrConversationId(currConversationId, APP_ID, false)
         console.log('START_CHAT', event.data.inputs)
-        // if (currConversationId === '-1') {
-        //   handleConversationIdChange('-1')
-        // }
         setCurrInputs(event.data.inputs)
-
-        // setChatStarted()
-        // // parse variables in introduction
-        // setChatList(generateNewChatListWithOpenStatement('', event.data.inputs))
-        // handleStartChat(event.data.inputs);
 
         const inputLens = Object.values(event.data.inputs).length;
         const promptVariablesLens = promptConfig?.prompt_variables?.length || 0;
@@ -122,7 +125,7 @@ const Main: FC<IMainProps> = () => {
           
         if (allInputsHaveValue) {
           // 自动发送一条消息
-          handleSend('生成函件', undefined, event.data.inputs)
+          handleSend('生成函件', undefined, event.data.inputs, currConversationId)
         }
 
         // 发送响应回父页面
@@ -142,8 +145,8 @@ const Main: FC<IMainProps> = () => {
   }, []);
   
   useEffect(() => {
-    console.log('currInputs', currInputs)
-    if (!currInputs || !promptConfig?.prompt_variables || isChatStarted)
+    console.log('currInputs', currInputs, currConversationId)
+    if (!currInputs || !promptConfig?.prompt_variables || isChatStarted || isEmptyObject(currInputs))
       return;
   
     const inputLens = Object.values(currInputs).length;
@@ -159,7 +162,6 @@ const Main: FC<IMainProps> = () => {
 
   // 页面加载完成后，自动调用handleStartChat方法，进入会话页面
   useEffect(() => {
-    // handleStartChat(currInputs || {});
     console.log('hi', currInputs, currConversationId)
     if (currConversationId !== '-1') {
       console.log('o')
@@ -237,6 +239,7 @@ const Main: FC<IMainProps> = () => {
     if (id === '-1') {
       createNewChat()
       setConversationIdChangeBecauseOfNew(true)
+      handleStartChat(defaultObj)
     }
     else {
       setConversationIdChangeBecauseOfNew(false)
@@ -403,16 +406,19 @@ const Main: FC<IMainProps> = () => {
     setChatList(newListWithAnswer)
   }
 
-  const handleSend = async (message: string, files?: VisionFile[], inputsCof?: object) => {
+  const isEmptyObject = (obj: any) => obj && typeof obj === 'object' && Object.keys(obj).length === 0;
+
+  const handleSend = async (message: string, files?: VisionFile[], inputsConf?: object, currConIdConf?: string) => {
     if (isResponding) {
       notify({ type: 'info', message: t('app.errorMessage.waitForResponse') })
       return
     }
-    console.log(currInputs, isNewConversation, currConversationId)
+    const inputs = inputsConf || (isEmptyObject(currInputs) ? defaultObj : currInputs)
+    console.log('inputs', isNewConversation, currConversationId, currConIdConf)
     const data: Record<string, any> = {
-      inputs: inputsCof || currInputs,
+      inputs,
       query: message,
-      conversation_id: isNewConversation ? null : currConversationId,
+      conversation_id: currConIdConf ? currConIdConf : isNewConversation ? null : currConversationId,
     }
 
     if (visionConfig?.enabled && files && files?.length > 0) {
@@ -502,12 +508,14 @@ const Main: FC<IMainProps> = () => {
 
         if (getConversationIdChangeBecauseOfNew()) {
           const { data: allConversations }: any = await fetchConversations()
-          const newItem: any = await generationConversationName(allConversations[0].id)
+          if (allConversations.length) {
+            const newItem: any = await generationConversationName(allConversations[0]?.id)
 
           const newAllConversations = produce(allConversations, (draft: any) => {
-            draft[0].name = newItem.name
+              draft[0].name = newItem?.name
           })
           setConversationList(newAllConversations as any)
+          }
         }
         setConversationIdChangeBecauseOfNew(false)
         resetNewConversationInputs()
