@@ -102,7 +102,7 @@ const Chat: FC<IChatProps> = ({
   }
 
   const handleKeyUp = (e: any) => {
-    if (e.code === 'Enter') {
+    if (e.code === 'Enter' || e.code === 'NumpadEnter') {
       e.preventDefault()
       // prevent send message when using input method enter
       if (!e.shiftKey && !isUseInputMethod.current)
