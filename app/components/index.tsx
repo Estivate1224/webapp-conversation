@@ -97,7 +97,6 @@ const Main: FC<IMainProps> = () => {
   const [conversationIdChangeBecauseOfNew, setConversationIdChangeBecauseOfNew, getConversationIdChangeBecauseOfNew] = useGetState(false)
   const [isChatStarted, { setTrue: setChatStarted, setFalse: setChatNotStarted }] = useBoolean(false)
   const handleStartChat = (inputs: Record<string, any>) => {
-    // console.log('handleStartChat', inputs)
     createNewChat()
     setConversationIdChangeBecauseOfNew(true)
     setCurrInputs(inputs)
@@ -125,7 +124,7 @@ const Main: FC<IMainProps> = () => {
           
         if (allInputsHaveValue) {
           // 自动发送一条消息
-          handleSend('生成函件', undefined, event.data.inputs, currConversationId)
+          handleSend('生成函件', undefined, event.data.inputs)
         }
 
         // 发送响应回父页面
@@ -158,13 +157,12 @@ const Main: FC<IMainProps> = () => {
     if (allInputsHaveValue) {
       handleStartChat(currInputs);
     }
-  }, [currInputs, promptConfig?.prompt_variables, isChatStarted]);
+  }, [currInputs]);
 
   // 页面加载完成后，自动调用handleStartChat方法，进入会话页面
   useEffect(() => {
-    console.log('hi', currInputs, currConversationId)
+    console.log('hi init', currInputs, currConversationId)
     if (currConversationId !== '-1') {
-      console.log('o')
       handleConversationIdChange('-1')
     } else {
       handleStartChat({});
@@ -205,32 +203,33 @@ const Main: FC<IMainProps> = () => {
       setCurrInputs(notSyncToStateInputs)
     }
 
+    // 因调整chatList的渲染方式，所以暂时注释此处逻辑
     // update chat list of current conversation
-    if (!isNewConversation && !conversationIdChangeBecauseOfNew && !isResponding) {
-      fetchChatList(currConversationId).then((res: any) => {
-        const { data } = res
-        const newChatList: ChatItem[] = generateNewChatListWithOpenStatement(notSyncToStateIntroduction, notSyncToStateInputs)
+    // if (!isNewConversation && !conversationIdChangeBecauseOfNew && !isResponding) {
+    //   fetchChatList(currConversationId).then((res: any) => {
+    //     const { data } = res
+    //     const newChatList: ChatItem[] = generateNewChatListWithOpenStatement(notSyncToStateIntroduction, notSyncToStateInputs)
 
-        data.forEach((item: any) => {
-          newChatList.push({
-            id: `question-${item.id}`,
-            content: item.query,
-            isAnswer: false,
-            message_files: item.message_files?.filter((file: any) => file.belongs_to === 'user') || [],
+    //     data.forEach((item: any) => {
+    //       newChatList.push({
+    //         id: `question-${item.id}`,
+    //         content: item.query,
+    //         isAnswer: false,
+    //         message_files: item.message_files?.filter((file: any) => file.belongs_to === 'user') || [],
 
-          })
-          newChatList.push({
-            id: item.id,
-            content: item.answer,
-            agent_thoughts: addFileInfos(item.agent_thoughts ? sortAgentSorts(item.agent_thoughts) : item.agent_thoughts, item.message_files),
-            feedback: item.feedback,
-            isAnswer: true,
-            message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
-          })
-        })
-        setChatList(newChatList)
-      })
-    }
+    //       })
+    //       newChatList.push({
+    //         id: item.id,
+    //         content: item.answer,
+    //         agent_thoughts: addFileInfos(item.agent_thoughts ? sortAgentSorts(item.agent_thoughts) : item.agent_thoughts, item.message_files),
+    //         feedback: item.feedback,
+    //         isAnswer: true,
+    //         message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
+    //       })
+    //     })
+    //     setChatList(newChatList)
+    //   })
+    // }
 
     if (isNewConversation && isChatStarted)
       setChatList(generateNewChatListWithOpenStatement())
@@ -418,7 +417,7 @@ const Main: FC<IMainProps> = () => {
       return
     }
     const inputs = inputsConf || (isEmptyObject(currInputs) ? defaultObj : currInputs)
-    console.log('inputs', isNewConversation, currConversationId, currConIdConf)
+    console.log('inputs', inputs, isNewConversation, currConversationId, currConIdConf)
     const data: Record<string, any> = {
       inputs,
       query: message,
