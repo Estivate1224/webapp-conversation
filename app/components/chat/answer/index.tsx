@@ -191,7 +191,8 @@ const Answer: FC<IAnswerProps> = ({
         </div>
         <div className={`${s.answerWrap}`}>
           <div className={`${s.answer} relative text-sm text-gray-900`}>
-            <div className={`ml-2 py-3 px-4 bg-white rounded-tr-2xl rounded-b-2xl ${workflowProcess && 'min-w-[480px]'} max-w-[85%]`}>
+            {/*  && 'min-w-[480px]' */}
+            <div className={`ml-2 py-3 px-4 bg-white rounded-tr-2xl rounded-b-2xl ${workflowProcess} max-w-[464px]`}>
               {workflowProcess && (
                 <WorkflowProcess data={workflowProcess} hideInfo />
               )}
