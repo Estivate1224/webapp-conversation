@@ -354,7 +354,9 @@ const Main: FC<IMainProps> = () => {
     })()
   }, [])
 
-  const [isResponding, { setTrue: setRespondingTrue, setFalse: setRespondingFalse }] = useBoolean(false)
+  const [isResponding, setResponding, getIsResponding] = useGetState(false)
+  const setRespondingTrue = () => setResponding(true)
+  const setRespondingFalse = () => setResponding(false)
   const [abortController, setAbortController] = useState<AbortController | null>(null)
   const { notify } = Toast
   const logError = (message: string) => {
@@ -412,7 +414,7 @@ const Main: FC<IMainProps> = () => {
   const isEmptyObject = (obj: any) => obj && typeof obj === 'object' && Object.keys(obj).length === 0;
 
   const handleSend = async (message: string, files?: VisionFile[], inputsConf?: object, currConIdConf?: string) => {
-    if (isResponding) {
+    if (getIsResponding()) {
       notify({ type: 'info', message: t('app.errorMessage.waitForResponse') })
       return
     }
