@@ -15,6 +15,7 @@ import Tooltip from '@/app/components/base/tooltip'
 import WorkflowProcess from '@/app/components/workflow/workflow-process'
 import { Markdown } from '@/app/components/base/markdown'
 import type { Emoji } from '@/types/tools'
+import SuggestedQuestions from './suggested-questions'
 
 const OperationBtn = ({ innerContent, onClick, className }: { innerContent: React.ReactNode; onClick?: () => void; className?: string }) => (
   <div
@@ -61,6 +62,7 @@ type IAnswerProps = {
   onFeedback?: FeedbackFunc
   isResponding?: boolean
   allToolIcons?: Record<string, string | Emoji>
+  onHandleSend: (question: string) => void
 }
 
 // The component needs to maintain its own state to control whether to display input component
@@ -70,8 +72,9 @@ const Answer: FC<IAnswerProps> = ({
   onFeedback,
   isResponding,
   allToolIcons,
+  onHandleSend,
 }) => {
-  const { id, content, feedback, agent_thoughts, workflowProcess } = item
+  const { id, content, feedback, agent_thoughts, workflowProcess, suggestedQuestions } = item
   const isAgentMode = !!agent_thoughts && agent_thoughts.length > 0
 
   const { t } = useTranslation()
@@ -146,7 +149,15 @@ const Answer: FC<IAnswerProps> = ({
       {agent_thoughts?.map((item, index) => (
         <div key={index}>
           {item.thought && (
-            <Markdown content={item.thought} />
+            <>
+              <Markdown content={item.thought} />
+              {suggestedQuestions && (
+                <SuggestedQuestions
+                  onHandleSend={onHandleSend}
+                  suggestedQuestions={suggestedQuestions}
+                />
+              )}
+            </>
           )}
           {/* {item.tool} */}
           {/* perhaps not use tool */}
@@ -190,10 +201,21 @@ const Answer: FC<IAnswerProps> = ({
                     <LoadingAnim type='text' />
                   </div>
                 )
-                : (isAgentMode
+                : (
+                  isAgentMode
                   ? agentModeAnswer
                   : (
-                    <Markdown content={content} />
+                    <>
+                      <Markdown content={content} />
+                      {suggestedQuestions
+                        ? (
+                          <SuggestedQuestions
+                            onHandleSend={onHandleSend}
+                            suggestedQuestions={suggestedQuestions}
+                          />
+                        )
+                        : null}
+                    </>
                   ))}
             </div>
             <div className='absolute top-[-14px] right-[-14px] flex flex-row justify-end gap-1'>

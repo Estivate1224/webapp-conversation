@@ -33,6 +33,7 @@ export type IChatProps = {
   isResponding?: boolean
   controlClearQuery?: number
   visionConfig?: VisionSettings
+  onHandleSend: (question: string) => void
 }
 
 const Chat: FC<IChatProps> = ({
@@ -46,6 +47,7 @@ const Chat: FC<IChatProps> = ({
   isResponding,
   controlClearQuery,
   visionConfig,
+  onHandleSend,
 }) => {
   const { t } = useTranslation()
   const { notify } = Toast
@@ -131,6 +133,7 @@ const Chat: FC<IChatProps> = ({
               feedbackDisabled={feedbackDisabled}
               onFeedback={onFeedback}
               isResponding={isResponding && isLast}
+              onHandleSend={onHandleSend}
             />
           }
           return (

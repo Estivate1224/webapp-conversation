@@ -100,6 +100,7 @@ export type ConversationItem = {
   name: string
   inputs: Record<string, any> | null
   introduction: string
+  suggested_questions?: string[]
 }
 
 export type AppInfo = {
